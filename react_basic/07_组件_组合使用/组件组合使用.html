@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>组件组合使用</title>
+</head>
+<body>
+
+<div id="example"></div>
+
+<!--引入react核心库-->
+<script type="text/javascript" src="../js/react.development.js"></script>
+<!--引入操作react操作DOM库-->
+<script type="text/javascript" src="../js/react-dom.development.js"></script>
+<!--引入babel-->
+<script type="text/javascript" src="../js/babel.min.js"></script>
+<!--引入传参限制库-->
+<script type="text/javascript" src="../js/prop-types.js"></script>
+
+<script type="text/babel">
+
+  // App应用组件(最外层的组件)
+  class App extends React.Component{
+    //创建state(状态)，保存数据，状态更新页面就更新
+    state = {
+      todoArr :['吃饭','睡觉','打豆豆']
+    }
+    //用于将输入框数据添加到state(状态)中的方法，并将该方法通过 props参数 传递给 Add组件使用，使得Add组件能够间接使用state
+    unshift = (data)=>{
+      //获取state的原数据
+      let todoArr  = this.state.todoArr
+      //在原数据基础上追加数据
+      todoArr.unshift(data)
+      //将添加数据后的数组重新设置给state
+      this.setState({todoArr:todoArr})
+    }
+    render(){
+      //解构赋值，获取todoArr数组
+      let {todoArr} = this.state
+      return (
+        <div>
+          <h1>Simple todo list</h1>
+          {/*props组件参数 传递 操作state的方法 和 state中数组的长度 给 Add使用*/}
+          <Add unshift = {this.unshift} count = {todoArr.length} />
+          {/*props传递组件参数*/}
+          <List todoArr ={todoArr} />
+        </div>
+      )
+    }
+  }
+
+  //Add组件---用于添加一条数据
+  class Add extends React.Component{
+    //点击事件
+    add = ()=>{
+      //1获取 App 通过 props组件参数  传递过来的 unshift方法，操作该方法间接将 数据 添加到 state中更新页面
+      let {unshift} = this.props
+      //2获取输入的数据
+      let useValue =  this.input.value
+      //3校验数据的合法性
+      if (useValue.trim() === '') return
+      //4添加数据到state中
+      unshift(useValue)
+      //5清空输入框
+      this.input.value = ''
+    }
+    render(){
+      //获取保存数据的数组的长度
+      let {count} = this.props
+      return (
+        <div>
+          {/*ref回调函数形式 获取当前的节点 ，this.input的值为input节点*/}
+          <input type="text" ref ={input=>{this.input = input}}/> &nbsp;
+          <button onClick ={this.add}>add #{count}</button>
+        </div>
+      )
+    }
+  }
+
+   //List组件---用于展示列表
+  class List extends React.Component{
+    render(){
+      let {todoArr} = this.props
+      return (
+        <ul>
+          {/*遍历数组，并返回加工后的数组*/}
+          {todoArr.map((item,index)=><li key ={index} >{item}</li>)}
+        </ul>
+      )
+    }
+  }
+  ReactDOM.render(<App/>,document.getElementById('example'))
+
+</script>
+
+</body>
+</html>
